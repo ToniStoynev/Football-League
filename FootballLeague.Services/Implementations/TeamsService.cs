@@ -2,6 +2,7 @@
 using FootballLeague.DataAccess;
 using FootballLeague.Services.Contracts;
 using FootballLeague.Services.Models;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace FootballLeague.Services.Implementations;
@@ -22,10 +23,7 @@ public class TeamsService : ITeamsService
             return false;
         }
 
-        var team = new Team
-        {
-            Name = teamDto.Name
-        };
+        var team = teamDto.Adapt<Team>();
 
         _dbContext.Teams.Add(team);
 
@@ -45,15 +43,7 @@ public class TeamsService : ITeamsService
             return null;
         }
 
-        return new TeamDto
-        {
-            Id = team.Id,
-            Name = team.Name,
-            MatchPlayed = team.MatchPlayed,
-            Draws = team.Draws,
-            Losses = team.Losses,
-            Wins = team.Wins
-        };
+        return team.Adapt<TeamDto>();
     }
 
     public async Task<bool> UpdateTeam(TeamDto teamDto, CancellationToken cancellationToken)
@@ -105,17 +95,7 @@ public class TeamsService : ITeamsService
              .Where(t => !t.IsDeleted)
              .OrderByDescending(t => t.Points)
              .ThenByDescending(t => t.ScoredGoals)
-             .Select(t => new TeamDto
-             {
-                 Id = t.Id,
-                 Name = t.Name,
-                 MatchPlayed = t.MatchPlayed,
-                 Wins = t.Wins,
-                 Draws = t.Draws,
-                 Losses = t.Losses,
-                 Points = t.Points,
-                 ScoredGoals = t.ScoredGoals
-             })
+             .Select(t => t.Adapt<TeamDto>())
              .ToListAsync(cancellationToken);
 
         return ranking;

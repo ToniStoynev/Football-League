@@ -3,6 +3,7 @@ using FootballLeague.DataAccess;
 using FootballLeague.Domain;
 using FootballLeague.Services.Contracts;
 using FootballLeague.Services.Models;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace FootballLeague.Services.Implementations;
@@ -40,16 +41,9 @@ public class MatchesService : IMatchesService
 
         UpdateTeamsStatistics(matchDto, homeTeam, awayTeam);
 
-        var match = new Match
-        {
-            HomeTeamId = matchDto.HomeTeamId,
-            AwayTeamId = matchDto.AwayTeamId,
-            HomeTeamGoals = matchDto.HomeTeamGoals,
-            AwayTeamGoals = matchDto.AwayTeamGoals
-        };
+        var match = matchDto.Adapt<Match>();
 
         _dbContext.Matches.Add(match);
-
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
@@ -67,14 +61,7 @@ public class MatchesService : IMatchesService
             return null;
         }
 
-        return new MatchDto
-        {
-            Id = match.Id,
-            HomeTeamId = match.HomeTeamId,
-            AwayTeamId = match.AwayTeamId,
-            HomeTeamGoals = match.HomeTeamGoals,
-            AwayTeamGoals = match.AwayTeamGoals
-        };
+        return match.Adapt<MatchDto>();
     }
 
     public async Task<IEnumerable<MatchDto>> GetMatchesByTeamId(Guid teamId, CancellationToken cancellationToken)
@@ -84,14 +71,7 @@ public class MatchesService : IMatchesService
              .Where(m => m.HomeTeamId == teamId
                     || m.AwayTeamId == teamId
                     && !m.IsDeleted)
-             .Select(m => new MatchDto
-             {
-                 Id = m.Id,
-                 HomeTeamId = m.HomeTeamId,
-                 AwayTeamId = m.AwayTeamId,
-                 HomeTeamGoals = m.HomeTeamGoals,
-                 AwayTeamGoals = m.AwayTeamGoals
-             })
+             .Select(m => m.Adapt<MatchDto>())
              .ToListAsync(cancellationToken);
 
         return matches;
@@ -102,14 +82,7 @@ public class MatchesService : IMatchesService
         var matches = await _dbContext
             .Matches
             .Where(t => !t.IsDeleted)
-            .Select(m => new MatchDto
-            {
-                Id = m.Id,
-                HomeTeamId = m.HomeTeamId,
-                AwayTeamId = m.AwayTeamId,
-                HomeTeamGoals = m.HomeTeamGoals,
-                AwayTeamGoals = m.AwayTeamGoals
-            })
+            .Select(m => m.Adapt<MatchDto>())
             .ToListAsync(cancellationToken);
 
         return matches;

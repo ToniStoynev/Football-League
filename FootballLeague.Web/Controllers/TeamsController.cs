@@ -1,6 +1,7 @@
 ﻿using FootballLeague.Services.Contracts;
 using FootballLeague.Services.Models;
 using FootballLeague.Web.Models.RequestModels;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FootballLeague.Web.Controllers;
@@ -20,15 +21,15 @@ public class TeamsController : ControllerBase
     [ProducesResponseType(404)]
     [ProducesResponseType(200)]
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetTeam(Guid teamId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetTeam(Guid id, CancellationToken cancellationToken)
     {
         try
         {
-            var team = await _teamsService.GetTeam(teamId, cancellationToken);
+            var team = await _teamsService.GetTeam(id, cancellationToken);
 
             if (team is null)
             {
-                return NotFound($"Team with {teamId} does not exist");
+                return NotFound($"Team with {id} does not exist");
             }
 
             return Ok(team);
@@ -75,15 +76,8 @@ public class TeamsController : ControllerBase
     {
         try
         {
-            var teamDto = new TeamDto()
-            {
-                Id = id,
-                Name = updateTeamRequest.Name,
-                MatchPlayed = updateTeamRequest.MatchPlayed,
-                Wins = updateTeamRequest.Wins,
-                Draws = updateTeamRequest.Draws,
-                Losses = updateTeamRequest.Losses
-            };
+            var teamDto = updateTeamRequest.Adapt<TeamDto>();
+            teamDto.Id = id;
 
             var isSuccessfullyUpdated = await _teamsService
                 .UpdateTeam(teamDto,

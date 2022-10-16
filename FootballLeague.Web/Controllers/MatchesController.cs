@@ -1,6 +1,7 @@
 ﻿using FootballLeague.Services.Contracts;
 using FootballLeague.Services.Models;
 using FootballLeague.Web.Models.RequestModels;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FootballLeague.Web.Controllers;
@@ -93,13 +94,7 @@ public class MatchesController : ControllerBase
     {
         try
         {
-            var matchDto = new MatchDto
-            {
-                HomeTeamId = addMatchRequest.HomeTeamId,
-                AwayTeamId = addMatchRequest.AwayTeamId,
-                HomeTeamGoals = addMatchRequest.HomeTeamGoals,
-                AwayTeamGoals = addMatchRequest.AwayTeamGoals
-            };
+            var matchDto = addMatchRequest.Adapt<MatchDto>();
 
             var isSuccessfullyAdded = await _matchesService.AddMatch(matchDto, cancellationToken);
 
@@ -126,12 +121,8 @@ public class MatchesController : ControllerBase
     {
         try
         {
-            var matchDto = new MatchDto()
-            {
-                Id = id,
-                HomeTeamGoals = resultRequest.HomeTeamGoals,
-                AwayTeamGoals = resultRequest.AwayTeamGoals
-            };
+            var matchDto = resultRequest.Adapt<MatchDto>();
+            matchDto.Id = id;
 
             var isSuccessfullyUpdated = await _matchesService
                 .UpdateMatch(matchDto, cancellationToken);
