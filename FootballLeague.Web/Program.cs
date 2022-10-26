@@ -2,6 +2,7 @@ using FootballLeague.DataAccess;
 using FootballLeague.Services.Contracts;
 using FootballLeague.Services.Implementations;
 using FootballLeague.Web.Extensions;
+using FootballLeague.Web.Middlewares;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -16,6 +17,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
 
 builder.Services.AddScoped<ITeamsService, TeamsService>();
 builder.Services.AddScoped<IMatchesService, MatchesService>();
@@ -34,6 +37,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
 app.MapControllers();
 

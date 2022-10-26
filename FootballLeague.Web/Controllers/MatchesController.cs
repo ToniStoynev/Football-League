@@ -23,21 +23,14 @@ public class MatchesController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetMatch(Guid id, CancellationToken cancellationToken)
     {
-        try
-        {
-            var match = await _matchesService.GetMatch(id, cancellationToken);
+        var match = await _matchesService.GetMatch(id, cancellationToken);
 
-            if (match is null)
-            {
-                return NotFound($"Match with {id} does not exist");
-            }
-
-            return Ok(match);
-        }
-        catch (Exception ex)
+        if (match is null)
         {
-            return BadRequest(ex.Message);
+            return NotFound($"Match with {id} does not exist");
         }
+
+        return Ok(match);
     }
 
     [ProducesResponseType(400)]
@@ -46,21 +39,14 @@ public class MatchesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllMatch(CancellationToken cancellationToken)
     {
-        try
-        {
-            var matches = await _matchesService.GetAll(cancellationToken);
+        var matches = await _matchesService.GetAll(cancellationToken);
 
-            if (!matches.Any())
-            {
-                return NotFound("No matches played yet");
-            }
-
-            return Ok(matches);
-        }
-        catch (Exception ex)
+        if (!matches.Any())
         {
-            return BadRequest(ex.Message);
+            return NotFound("No matches played yet");
         }
+
+        return Ok(matches);
     }
 
     [ProducesResponseType(400)]
@@ -69,21 +55,14 @@ public class MatchesController : ControllerBase
     [HttpGet("teamId")]
     public async Task<IActionResult> GetAllMatchesByTeam(Guid teamId, CancellationToken cancellationToken)
     {
-        try
-        {
-            var matches = await _matchesService.GetMatchesByTeamId(teamId, cancellationToken);
+        var matches = await _matchesService.GetMatchesByTeamId(teamId, cancellationToken);
 
-            if (!matches.Any())
-            {
-                return NotFound($"Team with id: {teamId} matches played yet");
-            }
-
-            return Ok(matches);
-        }
-        catch (Exception ex)
+        if (!matches.Any())
         {
-            return BadRequest(ex.Message);
+            return NotFound($"Team with id: {teamId} matches played yet");
         }
+
+        return Ok(matches);
     }
 
     [ProducesResponseType(400)]
@@ -92,23 +71,16 @@ public class MatchesController : ControllerBase
     public async Task<IActionResult> AddMatch(AddMatchRequest addMatchRequest,
         CancellationToken cancellationToken)
     {
-        try
+        var matchDto = addMatchRequest.Adapt<MatchDto>();
+
+        var isSuccessfullyAdded = await _matchesService.AddMatch(matchDto, cancellationToken);
+
+        if (!isSuccessfullyAdded)
         {
-            var matchDto = addMatchRequest.Adapt<MatchDto>();
-
-            var isSuccessfullyAdded = await _matchesService.AddMatch(matchDto, cancellationToken);
-
-            if (!isSuccessfullyAdded)
-            {
-                return BadRequest("Team passed do not exist!");
-            }
-
-            return CreatedAtAction(nameof(AddMatch), addMatchRequest);
+            return BadRequest("Team passed do not exist!");
         }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+
+        return CreatedAtAction(nameof(AddMatch), addMatchRequest);
     }
 
     [ProducesResponseType(400)]
@@ -119,26 +91,18 @@ public class MatchesController : ControllerBase
         [FromBody] ResultRequest resultRequest,
         CancellationToken cancellationToken)
     {
-        try
+        var matchDto = resultRequest.Adapt<MatchDto>();
+        matchDto.Id = id;
+
+        var isSuccessfullyUpdated = await _matchesService
+            .UpdateMatch(matchDto, cancellationToken);
+
+        if (!isSuccessfullyUpdated)
         {
-            var matchDto = resultRequest.Adapt<MatchDto>();
-            matchDto.Id = id;
-
-            var isSuccessfullyUpdated = await _matchesService
-                .UpdateMatch(matchDto, cancellationToken);
-
-            if (!isSuccessfullyUpdated)
-            {
-                return NotFound($"Match with {id} does not exist");
-            }
-
-            return Ok(matchDto);
-
+            return NotFound($"Match with {id} does not exist");
         }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+
+        return Ok(matchDto);
     }
 
     [ProducesResponseType(400)]
@@ -148,21 +112,14 @@ public class MatchesController : ControllerBase
     public async Task<IActionResult> DeleteMatch([FromRoute] Guid id,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            var isSuccessfullyDeleted = await _matchesService
-                .DeleteMatch(id, cancellationToken);
+        var isSuccessfullyDeleted = await _matchesService
+            .DeleteMatch(id, cancellationToken);
 
-            if (!isSuccessfullyDeleted)
-            {
-                return NotFound($"Match with {id} does not exist");
-            }
-
-            return NoContent();
-        }
-        catch (Exception ex)
+        if (!isSuccessfullyDeleted)
         {
-            return BadRequest(ex.Message);
+            return NotFound($"Match with {id} does not exist");
         }
+
+        return NoContent();
     }
 }

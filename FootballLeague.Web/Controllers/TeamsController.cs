@@ -23,23 +23,15 @@ public class TeamsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetTeam(Guid id, CancellationToken cancellationToken)
     {
-        try
-        {
-            var team = await _teamsService.GetTeam(id, cancellationToken);
+        var team = await _teamsService.GetTeam(id, cancellationToken);
 
-            if (team is null)
-            {
-                return NotFound($"Team with {id} does not exist");
-            }
-
-            return Ok(team);
-        }
-        catch (Exception ex)
+        if (team is null)
         {
-            return BadRequest(ex.Message);
+            return NotFound($"Team with {id} does not exist");
         }
+
+        return Ok(team);
     }
-
 
     [ProducesResponseType(400)]
     [ProducesResponseType(typeof(CreateTeamRequest), 201)]
@@ -47,23 +39,16 @@ public class TeamsController : ControllerBase
     public async Task<IActionResult> AddTeam(CreateTeamRequest createTeamRequest,
         CancellationToken cancellationToken)
     {
-        try
-        {
-            var isCreated = await _teamsService.AddTeam(
-                new TeamDto() { Name = createTeamRequest.Name },
-                cancellationToken);
+        var isCreated = await _teamsService.AddTeam(
+            new TeamDto() { Name = createTeamRequest.Name },
+            cancellationToken);
 
-            if (!isCreated)
-            {
-                return BadRequest("Team was not created!");
-            }
-
-            return CreatedAtAction(nameof(AddTeam), createTeamRequest);
-        }
-        catch (Exception ex)
+        if (!isCreated)
         {
-            return BadRequest(ex.Message);
+            return BadRequest("Team was not created!");
         }
+
+        return CreatedAtAction(nameof(AddTeam), createTeamRequest);
     }
 
     [ProducesResponseType(400)]
@@ -74,27 +59,19 @@ public class TeamsController : ControllerBase
         [FromBody] UpdateTeamRequest updateTeamRequest,
         CancellationToken cancellationToken)
     {
-        try
+        var teamDto = updateTeamRequest.Adapt<TeamDto>();
+        teamDto.Id = id;
+
+        var isSuccessfullyUpdated = await _teamsService
+            .UpdateTeam(teamDto,
+                cancellationToken);
+
+        if (!isSuccessfullyUpdated)
         {
-            var teamDto = updateTeamRequest.Adapt<TeamDto>();
-            teamDto.Id = id;
-
-            var isSuccessfullyUpdated = await _teamsService
-                .UpdateTeam(teamDto,
-                    cancellationToken);
-
-            if (!isSuccessfullyUpdated)
-            {
-                return NotFound($"Team with {id} does not exist");
-            }
-
-            return Ok(updateTeamRequest);
-
+            return NotFound($"Team with {id} does not exist");
         }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+
+        return Ok(updateTeamRequest);
     }
 
     [ProducesResponseType(400)]
@@ -104,23 +81,15 @@ public class TeamsController : ControllerBase
     public async Task<IActionResult> DeleteTeam([FromRoute] Guid id,
         CancellationToken cancellationToken)
     {
-        try
+        var isSuccessfullyDeleted = await _teamsService
+            .DeleteTeam(id, cancellationToken);
+
+        if (!isSuccessfullyDeleted)
         {
-            var isSuccessfullyDeleted = await _teamsService
-                .DeleteTeam(id, cancellationToken);
-
-            if (!isSuccessfullyDeleted)
-            {
-                return NotFound($"Team with {id} does not exist");
-            }
-
-            return NoContent();
-
+            return NotFound($"Team with {id} does not exist");
         }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+
+        return NoContent();
     }
 
     [ProducesResponseType(400)]
@@ -128,15 +97,8 @@ public class TeamsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetRanking(CancellationToken cancellationToken)
     {
-        try
-        {
-            var ranking = await _teamsService.GetRanking(cancellationToken);
+        var ranking = await _teamsService.GetRanking(cancellationToken);
 
-            return Ok(ranking);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        return Ok(ranking);
     }
 }
