@@ -8,6 +8,8 @@ internal class MatchConfiguration : IEntityTypeConfiguration<Match>
 {
     public void Configure(EntityTypeBuilder<Match> builder)
     {
+        builder.HasQueryFilter(m => !m.IsDeleted);
+
         builder.HasOne(m => m.HomeTeam)
             .WithMany(t => t.Matches)
             .HasForeignKey(m => m.HomeTeamId)

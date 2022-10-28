@@ -36,7 +36,7 @@ public class TeamsService : ITeamsService
     {
         var team = await _dbContext
             .Teams
-            .SingleOrDefaultAsync(t => t.Id == teamId && !t.IsDeleted, cancellationToken);
+            .SingleOrDefaultAsync(t => t.Id == teamId, cancellationToken);
 
         if (team is null)
         {
@@ -92,7 +92,6 @@ public class TeamsService : ITeamsService
     {
         var ranking = await _dbContext
              .Teams
-             .Where(t => !t.IsDeleted)
              .OrderByDescending(t => t.Points)
              .ThenByDescending(t => t.ScoredGoals)
              .Select(t => t.Adapt<TeamDto>())

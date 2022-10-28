@@ -54,7 +54,7 @@ public class MatchesService : IMatchesService
     {
         var match = await _dbContext
             .Matches
-            .SingleOrDefaultAsync(t => t.Id == matchId && !t.IsDeleted, cancellationToken);
+            .SingleOrDefaultAsync(t => t.Id == matchId, cancellationToken);
 
         if (match is null)
         {
@@ -69,8 +69,7 @@ public class MatchesService : IMatchesService
         var matches = await _dbContext
              .Matches
              .Where(m => m.HomeTeamId == teamId
-                    || m.AwayTeamId == teamId
-                    && !m.IsDeleted)
+                    || m.AwayTeamId == teamId)
              .Select(m => m.Adapt<MatchDto>())
              .ToListAsync(cancellationToken);
 
@@ -81,7 +80,6 @@ public class MatchesService : IMatchesService
     {
         var matches = await _dbContext
             .Matches
-            .Where(t => !t.IsDeleted)
             .Select(m => m.Adapt<MatchDto>())
             .ToListAsync(cancellationToken);
 
@@ -115,7 +113,7 @@ public class MatchesService : IMatchesService
                  .Matches
                  .Include(m => m.HomeTeam)
                  .Include(m => m.AwayTeam)
-                 .SingleOrDefaultAsync(m => m.Id == id && !m.IsDeleted);
+                 .SingleOrDefaultAsync(m => m.Id == id);
 
         if (match is null)
         {

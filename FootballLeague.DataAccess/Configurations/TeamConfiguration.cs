@@ -8,6 +8,8 @@ internal class TeamConfiguration : IEntityTypeConfiguration<Team>
 {
     public void Configure(EntityTypeBuilder<Team> builder)
     {
+        builder.HasQueryFilter(t => !t.IsDeleted);
+
         builder
             .HasKey(t => t.Id);
 
