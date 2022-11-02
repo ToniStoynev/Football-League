@@ -3,6 +3,7 @@ using FootballLeague.DataAccess;
 using FootballLeague.Domain;
 using FootballLeague.Services.Contracts;
 using FootballLeague.Services.Models;
+using FootballLeague.Services.Specifications;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
@@ -66,10 +67,7 @@ public class MatchesService : IMatchesService
 
     public async Task<IEnumerable<MatchDto>> GetMatchesByTeamId(Guid teamId, CancellationToken cancellationToken)
     {
-        var matches = await _dbContext
-             .Matches
-             .Where(m => m.HomeTeamId == teamId
-                    || m.AwayTeamId == teamId)
+        var matches = await ApplySpecification(new GetMatchesByTeamIdSpecification(teamId))
              .Select(m => m.Adapt<MatchDto>())
              .ToListAsync(cancellationToken);
 
@@ -197,5 +195,10 @@ public class MatchesService : IMatchesService
             match.AwayTeam.Points -= DrawPoints;
             match.AwayTeam.ScoredGoals -= match.AwayTeamGoals;
         }
+    }
+
+    private IQueryable<Match> ApplySpecification(Specification<Match> specification)
+    {
+        return SpecificationEvaluator.GetQuery(_dbContext.Set<Match>(), specification);
     }
 }

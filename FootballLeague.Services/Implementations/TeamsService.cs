@@ -1,5 +1,6 @@
 ﻿using FootballLeague.Data;
 using FootballLeague.DataAccess;
+using FootballLeague.Services.Common;
 using FootballLeague.Services.Contracts;
 using FootballLeague.Services.Models;
 using Mapster;
@@ -16,20 +17,18 @@ public class TeamsService : ITeamsService
         _dbContext = dbContext;
     }
 
-    public async Task<bool> AddTeam(TeamDto teamDto, CancellationToken cancellationToken)
+    public async Task<Result<TeamDto>> AddTeam(TeamDto teamDto, CancellationToken cancellationToken)
     {
         if (teamDto is null)
         {
-            return false;
+            return Result<TeamDto>.Failure(new List<string> { "Can not create team! teamDto is null" });
         }
 
-        var team = teamDto.Adapt<Team>();
-
-        _dbContext.Teams.Add(team);
+        var team = _dbContext.Teams.Add(teamDto.Adapt<Team>());
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        return true;
+        return Result<TeamDto>.SuccessWith(team.Adapt<TeamDto>());
     }
 
     public async Task<TeamDto?> GetTeam(Guid teamId, CancellationToken cancellationToken)

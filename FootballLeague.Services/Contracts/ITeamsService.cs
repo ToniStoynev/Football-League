@@ -1,10 +1,11 @@
-﻿using FootballLeague.Services.Models;
+﻿using FootballLeague.Services.Common;
+using FootballLeague.Services.Models;
 
 namespace FootballLeague.Services.Contracts;
 
 public interface ITeamsService
 {
-    Task<bool> AddTeam(TeamDto teamDto, CancellationToken cancellationToken);
+    Task<Result<TeamDto>> AddTeam(TeamDto teamDto, CancellationToken cancellationToken);
 
     Task<TeamDto?> GetTeam(Guid teamId, CancellationToken cancellationToken);
 

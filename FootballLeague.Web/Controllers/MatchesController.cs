@@ -80,7 +80,7 @@ public class MatchesController : ControllerBase
             return BadRequest("Team passed do not exist!");
         }
 
-        return CreatedAtAction(nameof(AddMatch), addMatchRequest);
+        return CreatedAtAction(nameof(GetMatch), addMatchRequest);
     }
 
     [ProducesResponseType(400)]

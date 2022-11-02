@@ -39,16 +39,16 @@ public class TeamsController : ControllerBase
     public async Task<IActionResult> AddTeam(CreateTeamRequest createTeamRequest,
         CancellationToken cancellationToken)
     {
-        var isCreated = await _teamsService.AddTeam(
+        var result = await _teamsService.AddTeam(
             new TeamDto() { Name = createTeamRequest.Name },
             cancellationToken);
 
-        if (!isCreated)
+        if (!result.Succeeded)
         {
             return BadRequest("Team was not created!");
         }
 
-        return CreatedAtAction(nameof(AddTeam), createTeamRequest);
+        return CreatedAtAction(nameof(GetTeam), new { id = result.Data.Id }, createTeamRequest);
     }
 
     [ProducesResponseType(400)]
